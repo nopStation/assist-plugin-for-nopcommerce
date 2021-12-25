@@ -39,6 +39,7 @@ namespace Nop.Plugin.Payments.Assist
         private readonly IAddressService _addressService;
         private readonly IStateProvinceService _stateProvinceService;
         private readonly ICountryService _countryService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         private const string TEST_ASSIST_PAYMENT_URL = "https://test.paysecure.ru/";
         private const string PAYMENT_COMMAND = "pay/order.cfm";
@@ -49,14 +50,15 @@ namespace Nop.Plugin.Payments.Assist
         #region Ctor
 
         public AssistPaymentProcessor(ICurrencyService currencyService,
-            ISettingService settingService, 
-            IWebHelper webHelper, 
-            AssistPaymentSettings assistPaymentSettings, 
+            ISettingService settingService,
+            IWebHelper webHelper,
+            AssistPaymentSettings assistPaymentSettings,
             CurrencySettings currencySettings,
             ILocalizationService localizationService,
             IAddressService addressService,
             IStateProvinceService stateProvinceService,
-            ICountryService countryService)
+            ICountryService countryService, 
+            IHttpContextAccessor httpContextAccessor)
         {
             _currencyService = currencyService;
             _settingService = settingService;
@@ -67,6 +69,7 @@ namespace Nop.Plugin.Payments.Assist
             _addressService = addressService;
             _stateProvinceService = stateProvinceService;
             _countryService = countryService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         #endregion
@@ -175,7 +178,7 @@ namespace Nop.Plugin.Payments.Assist
         /// <param name="postProcessPaymentRequest">Payment info required for an order processing</param>
         public async Task PostProcessPaymentAsync(PostProcessPaymentRequest postProcessPaymentRequest)
         {
-            var post = new RemotePost
+            var post = new RemotePost(_httpContextAccessor,_webHelper)
             {
                 FormName = "AssistPaymentForm",
                 Url = GetUrl(PAYMENT_COMMAND),
